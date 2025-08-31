@@ -1,0 +1,20 @@
+# AWS Configuration
+aws_region = "us-west-2"
+environment = "production"
+
+# Availability Zones
+availability_zones = ["us-west-2a", "us-west-2b"]
+
+# Database Configuration
+rds_instance_class = "db.t3.micro"
+db_password = "CHANGE_ME_IN_PRODUCTION"
+
+# ElastiCache Configuration
+elasticache_node_type = "cache.t3.micro"
+
+# EKS Configuration
+eks_cluster_name = "sentiment-trading-cluster"
+eks_node_group_instance_type = "t3.medium"
+eks_node_group_desired_capacity = 2
+eks_node_group_min_size = 1
+eks_node_group_max_size = 4

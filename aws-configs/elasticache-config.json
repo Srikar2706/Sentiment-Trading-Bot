@@ -1,0 +1,23 @@
+{
+  "elasticache": {
+    "engine": "redis",
+    "node_type": "cache.t3.micro",
+    "num_cache_nodes": 1,
+    "port": 6379,
+    "parameter_group_name": "default.redis7",
+    "subnet_group_name": "sentiment-trading-cache-subnet-group",
+    "security_group_ids": ["sg-xxxxxxxxx"],
+    "at_rest_encryption_enabled": true,
+    "transit_encryption_enabled": true,
+    "auth_token": "CHANGE_ME_IN_PRODUCTION",
+    "tags": {
+      "Project": "sentiment-trading",
+      "Environment": "production"
+    }
+  },
+  "redis": {
+    "maxmemory_policy": "allkeys-lru",
+    "notify_keyspace_events": "Ex",
+    "timeout": 300
+  }
+}

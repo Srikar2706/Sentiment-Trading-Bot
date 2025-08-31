@@ -1,0 +1,51 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: sentiment-trading-cluster
+  region: us-west-2
+  version: "1.28"
+
+vpc:
+  cidr: "10.0.0.0/16"
+  nat:
+    gateway: Single
+
+nodeGroups:
+  - name: sentiment-trading-nodes
+    instanceType: t3.medium
+    desiredCapacity: 2
+    minSize: 1
+    maxSize: 4
+    volumeSize: 20
+    privateNetworking: true
+    iam:
+      withAddonPolicies:
+        autoScaler: true
+        ebs: true
+        efs: true
+        fsx: true
+        albIngress: true
+    tags:
+      Project: sentiment-trading
+      Environment: production
+
+addons:
+  - name: vpc-cni
+    version: latest
+  - name: coredns
+    version: latest
+  - name: kube-proxy
+    version: latest
+  - name: aws-ebs-csi-driver
+    version: latest
+
+iam:
+  withOIDC: true
+  serviceAccounts:
+    - metadata:
+        name: sentiment-trading-sa
+        namespace: sentiment-trading
+      wellKnownPolicies:
+        autoScaler: true
+        ebs: true

@@ -221,25 +221,47 @@ sentiment-trading-mvp/
 
 ## 🚀 Production Deployment
 
-### AWS EKS
+### AWS Deployment (Recommended)
+
+#### Option 1: Terraform + EKS (Full Infrastructure)
 
 ```bash
-# Create EKS cluster
-eksctl create cluster --name sentiment-trading --region us-west-2
+# 1. Deploy AWS infrastructure with Terraform
+./scripts/deploy-terraform.sh
 
-# Deploy to EKS
-kubectl apply -f k8s-manifests/
+# 2. Create EKS cluster
+eksctl create cluster -f aws-configs/eks-cluster-config.yaml
 
-# Use AWS Load Balancer
-kubectl patch svc dashboard-service -p '{"spec":{"type":"LoadBalancer"}}'
+# 3. Deploy application to EKS
+./scripts/deploy-aws.sh
 ```
 
-### Cloud Services
+#### Option 2: Manual AWS Setup
 
-- **Database**: AWS RDS PostgreSQL
-- **Cache**: AWS ElastiCache Redis
-- **Monitoring**: CloudWatch + Prometheus
+```bash
+# 1. Create EKS cluster
+eksctl create cluster -f aws-configs/eks-cluster-config.yaml
+
+# 2. Create RDS PostgreSQL and ElastiCache Redis
+# (Use AWS Console or CLI)
+
+# 3. Update k8s-manifests/aws-secrets.yaml with credentials
+
+# 4. Deploy to EKS
+kubectl apply -f k8s-manifests/
+kubectl apply -f k8s-manifests/aws-load-balancer.yaml
+```
+
+### AWS Services Used
+
+- **Compute**: EKS (Kubernetes)
+- **Database**: RDS PostgreSQL
+- **Cache**: ElastiCache Redis
+- **Container Registry**: ECR
+- **Load Balancing**: Network Load Balancer
+- **Monitoring**: CloudWatch
 - **Logging**: CloudWatch Logs
+- **Networking**: VPC, Security Groups, Subnets
 
 ## 🤝 Contributing
 

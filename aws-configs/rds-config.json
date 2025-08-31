@@ -1,0 +1,29 @@
+{
+  "rds": {
+    "instance_class": "db.t3.micro",
+    "engine": "postgresql",
+    "engine_version": "15.4",
+    "allocated_storage": 20,
+    "storage_type": "gp2",
+    "multi_az": false,
+    "backup_retention_period": 7,
+    "backup_window": "03:00-04:00",
+    "maintenance_window": "sun:04:00-sun:05:00",
+    "deletion_protection": false,
+    "skip_final_snapshot": true,
+    "tags": {
+      "Project": "sentiment-trading",
+      "Environment": "production"
+    }
+  },
+  "database": {
+    "name": "sentiment_trading",
+    "username": "trading_user",
+    "password": "CHANGE_ME_IN_PRODUCTION"
+  },
+  "security": {
+    "vpc_security_group_ids": ["sg-xxxxxxxxx"],
+    "subnet_group_name": "sentiment-trading-subnet-group",
+    "publicly_accessible": false
+  }
+}
