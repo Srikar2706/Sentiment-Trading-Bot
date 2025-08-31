@@ -1,0 +1,97 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: trading-service
+  namespace: sentiment-trading
+  labels:
+    app: trading-service
+    component: trading-bot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: trading-service
+  template:
+    metadata:
+      labels:
+        app: trading-service
+        component: trading-bot
+    spec:
+      containers:
+      - name: trading-service
+        image: trading-service:latest
+        imagePullPolicy: Never  # For local development
+        ports:
+        - containerPort: 8002
+        env:
+        - name: REDIS_URL
+          value: "redis://cache-service:6379"
+        - name: POSTGRES_URL
+          value: "postgresql://trading_user:trading_password@db-service:5432/sentiment_trading"
+        - name: ALPACA_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: api-secrets
+              key: alpaca-api-key
+              optional: true
+        - name: ALPACA_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: api-secrets
+              key: alpaca-secret-key
+              optional: true
+        - name: ALPACA_BASE_URL
+          value: "https://paper-api.alpaca.markets"
+        - name: SENTIMENT_SERVICE_URL
+          value: "http://sentiment-service:8001"
+        - name: TRADE_FREQUENCY
+          value: "300"
+        - name: MAX_POSITION_SIZE
+          value: "10000"
+        - name: SENTIMENT_THRESHOLD
+          value: "0.6"
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "500m"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
+        volumeMounts:
+        - name: config-volume
+          mountPath: /app/configs
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8002
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8002
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+      volumes:
+      - name: config-volume
+        configMap:
+          name: sentiment-trading-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: trading-service
+  namespace: sentiment-trading
+  labels:
+    app: trading-service
+    component: trading-bot
+spec:
+  selector:
+    app: trading-service
+  ports:
+  - name: http
+    port: 8002
+    targetPort: 8002
+  type: ClusterIP

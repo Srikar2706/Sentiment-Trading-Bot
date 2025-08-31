@@ -1,0 +1,122 @@
+version: '3.8'
+
+services:
+  # redis
+  cache-service:
+    image: redis:7-alpine
+    container_name: sentiment-cache
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # postgres
+  db-service:
+    image: postgres:15-alpine
+    container_name: sentiment-db
+    environment:
+      POSTGRES_DB: sentiment_trading
+      POSTGRES_USER: trading_user
+      POSTGRES_PASSWORD: trading_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./db-service/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U trading_user -d sentiment_trading"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # sentiment service
+  sentiment-service:
+    build:
+      context: ./sentiment-service
+      dockerfile: Dockerfile
+    container_name: sentiment-analyzer
+    ports:
+      - "8001:8001"
+    environment:
+      - REDIS_URL=redis://cache-service:6379
+      - POSTGRES_URL=postgresql://trading_user:trading_password@db-service:5432/sentiment_trading
+      - TWITTER_API_KEY=${TWITTER_API_KEY}
+      - TWITTER_API_SECRET=${TWITTER_API_SECRET}
+      - REDDIT_CLIENT_ID=${REDDIT_CLIENT_ID}
+      - REDDIT_CLIENT_SECRET=${REDDIT_CLIENT_SECRET}
+      - NEWS_API_KEY=${NEWS_API_KEY}
+    depends_on:
+      cache-service:
+        condition: service_healthy
+      db-service:
+        condition: service_healthy
+    volumes:
+      - ./configs:/app/configs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # trading bot
+  trading-service:
+    build:
+      context: ./trading-service
+      dockerfile: Dockerfile
+    container_name: trading-bot
+    ports:
+      - "8002:8002"
+    environment:
+      - REDIS_URL=redis://cache-service:6379
+      - POSTGRES_URL=postgresql://trading_user:trading_password@db-service:5432/sentiment_trading
+      - ALPACA_API_KEY=${ALPACA_API_KEY}
+      - ALPACA_SECRET_KEY=${ALPACA_SECRET_KEY}
+      - ALPACA_BASE_URL=${ALPACA_BASE_URL}
+    depends_on:
+      cache-service:
+        condition: service_healthy
+      db-service:
+        condition: service_healthy
+      sentiment-service:
+        condition: service_healthy
+    volumes:
+      - ./configs:/app/configs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # dashboard
+  dashboard-service:
+    build:
+      context: ./dashboard-service
+      dockerfile: Dockerfile
+    container_name: trading-dashboard
+    ports:
+      - "8501:8501"
+    environment:
+      - REDIS_URL=redis://cache-service:6379
+      - POSTGRES_URL=postgresql://trading_user:trading_password@db-service:5432/sentiment_trading
+    depends_on:
+      cache-service:
+        condition: service_healthy
+      db-service:
+        condition: service_healthy
+    volumes:
+      - ./configs:/app/configs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501/_stcore/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  redis_data:
+  postgres_data:

@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: sentiment-trading
+  labels:
+    name: sentiment-trading
+    app: sentiment-trading-mvp

@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dashboard-service
+  namespace: sentiment-trading
+  labels:
+    app: dashboard-service
+    component: dashboard
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dashboard-service
+  template:
+    metadata:
+      labels:
+        app: dashboard-service
+        component: dashboard
+    spec:
+      containers:
+      - name: dashboard-service
+        image: dashboard-service:latest
+        imagePullPolicy: Never  # For local development
+        ports:
+        - containerPort: 8501
+        env:
+        - name: REDIS_URL
+          value: "redis://cache-service:6379"
+        - name: POSTGRES_URL
+          value: "postgresql://trading_user:trading_password@db-service:5432/sentiment_trading"
+        - name: SENTIMENT_SERVICE_URL
+          value: "http://sentiment-service:8001"
+        - name: TRADING_SERVICE_URL
+          value: "http://trading-service:8002"
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        volumeMounts:
+        - name: config-volume
+          mountPath: /app/configs
+        livenessProbe:
+          httpGet:
+            path: /_stcore/health
+            port: 8501
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /_stcore/health
+            port: 8501
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+      volumes:
+      - name: config-volume
+        configMap:
+          name: sentiment-trading-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dashboard-service
+  namespace: sentiment-trading
+  labels:
+    app: dashboard-service
+    component: dashboard
+spec:
+  selector:
+    app: dashboard-service
+  ports:
+  - name: http
+    port: 8501
+    targetPort: 8501
+  type: LoadBalancer  # Expose dashboard externally

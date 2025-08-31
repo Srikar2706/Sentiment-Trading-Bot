@@ -1,0 +1,133 @@
+{
+  "trading": {
+    "general": {
+      "max_position_size": 10000,
+      "sentiment_threshold": 0.6,
+      "trade_frequency_seconds": 300,
+      "max_positions_per_symbol": 1,
+      "paper_trading": true
+    },
+    "sentiment_weights": {
+      "twitter": 0.4,
+      "reddit": 0.3,
+      "news": 0.3
+    },
+    "symbols": {
+      "AAPL": {
+        "name": "Apple Inc.",
+        "sector": "Technology",
+        "sentiment_threshold": 0.6,
+        "max_position_size": 10000,
+        "weights": {
+          "twitter": 0.4,
+          "reddit": 0.3,
+          "news": 0.3
+        }
+      },
+      "GOOGL": {
+        "name": "Alphabet Inc.",
+        "sector": "Technology",
+        "sentiment_threshold": 0.6,
+        "max_position_size": 10000,
+        "weights": {
+          "twitter": 0.4,
+          "reddit": 0.3,
+          "news": 0.3
+        }
+      },
+      "MSFT": {
+        "name": "Microsoft Corporation",
+        "sector": "Technology",
+        "sentiment_threshold": 0.6,
+        "max_position_size": 10000,
+        "weights": {
+          "twitter": 0.4,
+          "reddit": 0.3,
+          "news": 0.3
+        }
+      },
+      "TSLA": {
+        "name": "Tesla Inc.",
+        "sector": "Automotive",
+        "sentiment_threshold": 0.7,
+        "max_position_size": 15000,
+        "weights": {
+          "twitter": 0.5,
+          "reddit": 0.3,
+          "news": 0.2
+        }
+      },
+      "NVDA": {
+        "name": "NVIDIA Corporation",
+        "sector": "Technology",
+        "sentiment_threshold": 0.6,
+        "max_position_size": 12000,
+        "weights": {
+          "twitter": 0.4,
+          "reddit": 0.3,
+          "news": 0.3
+        }
+      },
+      "AMZN": {
+        "name": "Amazon.com Inc.",
+        "sector": "Consumer Discretionary",
+        "sentiment_threshold": 0.6,
+        "max_position_size": 10000,
+        "weights": {
+          "twitter": 0.4,
+          "reddit": 0.3,
+          "news": 0.3
+        }
+      },
+      "META": {
+        "name": "Meta Platforms Inc.",
+        "sector": "Technology",
+        "sentiment_threshold": 0.6,
+        "max_position_size": 10000,
+        "weights": {
+          "twitter": 0.4,
+          "reddit": 0.3,
+          "news": 0.3
+        }
+      },
+      "NFLX": {
+        "name": "Netflix Inc.",
+        "sector": "Communication Services",
+        "sentiment_threshold": 0.6,
+        "max_position_size": 8000,
+        "weights": {
+          "twitter": 0.4,
+          "reddit": 0.3,
+          "news": 0.3
+        }
+      }
+    }
+  },
+  "data_sources": {
+    "twitter": {
+      "enabled": true,
+      "rate_limit": 300,
+      "keywords": ["stock", "investing", "trading", "earnings", "market"],
+      "exclude_keywords": ["spam", "bot", "fake"]
+    },
+    "reddit": {
+      "enabled": true,
+      "subreddits": ["investing", "stocks", "wallstreetbets", "StockMarket"],
+      "rate_limit": 60,
+      "min_score": 10
+    },
+    "news": {
+      "enabled": true,
+      "sources": ["reuters", "bloomberg", "cnbc", "yahoo"],
+      "rate_limit": 100,
+      "min_relevance": 0.7
+    }
+  },
+  "risk_management": {
+    "max_daily_loss": 1000,
+    "max_portfolio_risk": 0.05,
+    "stop_loss_percentage": 0.05,
+    "take_profit_percentage": 0.15,
+    "position_sizing": "fixed"
+  }
+}

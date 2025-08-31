@@ -1,0 +1,117 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sentiment-service
+  namespace: sentiment-trading
+  labels:
+    app: sentiment-service
+    component: sentiment-analysis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sentiment-service
+  template:
+    metadata:
+      labels:
+        app: sentiment-service
+        component: sentiment-analysis
+    spec:
+      containers:
+      - name: sentiment-service
+        image: sentiment-service:latest
+        imagePullPolicy: Never  # For local development
+        ports:
+        - containerPort: 8001
+        env:
+        - name: REDIS_URL
+          value: "redis://cache-service:6379"
+        - name: POSTGRES_URL
+          value: "postgresql://trading_user:trading_password@db-service:5432/sentiment_trading"
+        - name: TWITTER_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: api-secrets
+              key: twitter-api-key
+              optional: true
+        - name: TWITTER_API_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: api-secrets
+              key: twitter-api-secret
+              optional: true
+        - name: TWITTER_ACCESS_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: api-secrets
+              key: twitter-access-token
+              optional: true
+        - name: TWITTER_ACCESS_TOKEN_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: api-secrets
+              key: twitter-access-token-secret
+              optional: true
+        - name: REDDIT_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              name: api-secrets
+              key: reddit-client-id
+              optional: true
+        - name: REDDIT_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: api-secrets
+              key: reddit-client-secret
+              optional: true
+        - name: NEWS_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: api-secrets
+              key: news-api-key
+              optional: true
+        resources:
+          requests:
+            memory: "2Gi"
+            cpu: "500m"
+          limits:
+            memory: "4Gi"
+            cpu: "1000m"
+        volumeMounts:
+        - name: config-volume
+          mountPath: /app/configs
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8001
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8001
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+      volumes:
+      - name: config-volume
+        configMap:
+          name: sentiment-trading-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sentiment-service
+  namespace: sentiment-trading
+  labels:
+    app: sentiment-service
+    component: sentiment-analysis
+spec:
+  selector:
+    app: sentiment-service
+  ports:
+  - name: http
+    port: 8001
+    targetPort: 8001
+  type: ClusterIP
