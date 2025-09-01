@@ -129,7 +129,7 @@ docker-compose logs -f [service-name]
 
 ## Disclaimer
 
-⚠️ **This is a demo project. Don't use it for real trading without proper testing.**
+**This is a demo project. Don't use it for real trading without proper testing.**
 
 - Use paper trading only
 - Test thoroughly first
@@ -188,31 +188,6 @@ Access dashboard at http://localhost:8501
 ./scripts/deploy-terraform.sh
 ./scripts/deploy-aws.sh
 ```
-
-### Cost Comparison
-
-| Setup | Cost | Features |
-|-------|------|----------|
-| **Local** | $0-20/month | Full microservices, monitoring |
-| **AWS EKS** | $200-500/month | Full cloud infrastructure |
-
-## Contributing
-
-1. Fork the repo
-2. Create feature branch
-3. Make changes
-4. Submit pull request
-
-## License
-
-This project is for educational purposes. Make sure to follow all laws and regulations.
-
-## Support
-
-If you have issues:
-1. Check the logs
-2. Verify your config
-3. Open an issue
 
 ## Roadmap
 
