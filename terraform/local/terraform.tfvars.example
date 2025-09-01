@@ -1,0 +1,22 @@
+# Local Infrastructure Configuration
+# Copy this file to terraform.tfvars and update with your values
+
+# Database passwords
+redis_password = "your_secure_redis_password"
+postgres_password = "your_secure_postgres_password"
+grafana_password = "your_secure_grafana_password"
+
+# Docker image names (after building)
+sentiment_service_image = "sentiment-trading-sentiment-service:latest"
+trading_service_image = "sentiment-trading-trading-service:latest"
+dashboard_service_image = "sentiment-trading-dashboard-service:latest"
+
+# API Keys (optional for demo)
+twitter_api_key = ""
+twitter_api_secret = ""
+reddit_client_id = ""
+reddit_client_secret = ""
+news_api_key = ""
+alpaca_api_key = ""
+alpaca_secret_key = ""
+alpaca_base_url = "https://paper-api.alpaca.markets"

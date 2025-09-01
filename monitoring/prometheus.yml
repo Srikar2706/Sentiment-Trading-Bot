@@ -1,0 +1,55 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  # - "first_rules.yml"
+  # - "second_rules.yml"
+
+scrape_configs:
+  # Prometheus itself
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Sentiment Service
+  - job_name: 'sentiment-service'
+    static_configs:
+      - targets: ['sentiment-service:8001']
+    metrics_path: '/metrics'
+    scrape_interval: 10s
+
+  # Trading Service
+  - job_name: 'trading-service'
+    static_configs:
+      - targets: ['trading-service:8002']
+    metrics_path: '/metrics'
+    scrape_interval: 10s
+
+  # Dashboard Service
+  - job_name: 'dashboard-service'
+    static_configs:
+      - targets: ['dashboard-service:8501']
+    metrics_path: '/metrics'
+    scrape_interval: 10s
+
+  # Redis
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis:6379']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+
+  # PostgreSQL (if using postgres_exporter)
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['postgres:5432']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+
+  # Nginx (if using nginx_exporter)
+  - job_name: 'nginx'
+    static_configs:
+      - targets: ['nginx:80']
+    metrics_path: '/metrics'
+    scrape_interval: 30s

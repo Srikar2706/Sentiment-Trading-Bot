@@ -1,301 +1,223 @@
-# Sentiment Trading MVP
+# Sentiment Trading Bot
 
-Trading bot that uses sentiment analysis on social media/news to make trades. Uses FinBERT and Alpaca API.
+A trading bot that analyzes social media and news sentiment to make automated trades. Built with Python, FastAPI, and FinBERT.
 
-## Architecture
+## What it does
 
-5 services:
+- Scrapes Twitter, Reddit, and news for stock mentions
+- Analyzes sentiment using FinBERT (financial BERT model)
+- Makes trading decisions based on sentiment scores
+- Shows everything in a real-time dashboard
 
-1. **Sentiment Service** - FinBERT sentiment analysis + gets data from Twitter/Reddit/News
-2. **Trading Service** - trading bot that uses sentiment to make trades
-3. **Dashboard Service** - Streamlit dashboard to see what's happening
-4. **Database Service** - PostgreSQL for data
-5. **Cache Service** - Redis for caching
+## Services
 
-## Features
+- **Sentiment Service** - Handles sentiment analysis and data collection
+- **Trading Service** - Makes the actual trades via Alpaca API
+- **Dashboard** - Streamlit app to monitor everything
+- **Database** - PostgreSQL to store data
+- **Cache** - Redis for fast data access
 
-- Sentiment analysis from Twitter, Reddit, News APIs
-- FinBERT for financial sentiment
-- Automated trading with Alpaca API
-- Real-time dashboard
-- Configurable weights for different data sources
-- Basic risk management
-- Docker/K8s ready
+## Tech Stack
 
-## 🛠️ Tech Stack
-
-- **Backend**: FastAPI, Python 3.11
-- **Sentiment Analysis**: FinBERT, Transformers, PyTorch
-- **Trading**: Alpaca API, yfinance
+- **Backend**: FastAPI, Python
+- **ML**: FinBERT, PyTorch
+- **Trading**: Alpaca API
 - **Database**: PostgreSQL, Redis
-- **Dashboard**: Streamlit, Plotly
-- **Infrastructure**: Docker, Kubernetes
-- **Monitoring**: Health checks, structured logging
+- **Frontend**: Streamlit, Plotly
+- **Infrastructure**: Docker, Terraform
 
-## 📋 Prerequisites
+## Prerequisites
 
-- Docker and Docker Compose
+- Docker
 - Python 3.11+
-- Kubernetes cluster (minikube, kind, or cloud)
-- API keys for:
+- API keys (optional for demo):
   - Twitter API
   - Reddit API
   - News API
   - Alpaca Trading API
 
-## 🚀 Quick Start
+## Quick Start
 
-### 1. Clone and Setup
+### 1. Setup
 
 ```bash
 git clone <repository-url>
 cd sentiment-trading-mvp
 cp env.example .env
-# Edit .env with your API keys
+# Add your API keys to .env (optional)
 ```
 
-### 2. Local Development with Docker Compose
+### 2. Run Locally
 
 ```bash
-# Build and start all services
+# Start everything with Docker
 docker-compose up -d
 
-# Check service status
-docker-compose ps
-
-# View logs
-docker-compose logs -f sentiment-service
+# Or use the deployment script
+./scripts/deploy-local.sh
 ```
 
-### 3. Kubernetes Deployment
+### 3. Access Dashboard
 
-```bash
-# Make scripts executable
-chmod +x scripts/*.sh
+Open http://localhost:8501 in your browser
 
-# Build Docker images
-./scripts/build-images.sh
+## Configuration
 
-# Deploy to Kubernetes
-./scripts/deploy-k8s.sh
+### Trading Settings
 
-# Access dashboard
-kubectl port-forward -n sentiment-trading svc/dashboard-service 8501:8501
-```
-
-## 🔧 Configuration
-
-### Trading Configuration
-
-Edit `configs/trading_config.json` to customize:
-
-- Symbol-specific sentiment thresholds
-- Data source weights (Twitter, Reddit, News)
+Edit `configs/trading_config.json` to change:
+- Sentiment thresholds for different stocks
+- Weights for Twitter vs Reddit vs News
 - Position size limits
-- Risk management parameters
+- Risk settings
 
 ### Environment Variables
 
-Key environment variables in `.env`:
+Add your API keys to `.env`:
 
 ```bash
-# API Keys
-TWITTER_API_KEY=your_key_here
-REDDIT_CLIENT_ID=your_id_here
-NEWS_API_KEY=your_key_here
-ALPACA_API_KEY=your_key_here
-
-# Service URLs
-REDIS_URL=redis://localhost:6379
-POSTGRES_URL=postgresql://localhost:5432/sentiment_trading
+# API Keys (get these from the respective platforms)
+TWITTER_API_KEY=
+TWITTER_API_SECRET=
+REDDIT_CLIENT_ID=
+REDDIT_CLIENT_SECRET=
+NEWS_API_KEY=
+ALPACA_API_KEY=
+ALPACA_SECRET_KEY=
 ```
 
-## 📊 API Endpoints
+## API Endpoints
 
 ### Sentiment Service (Port 8001)
-
 - `GET /health` - Health check
 - `POST /analyze` - Analyze text sentiment
 - `POST /ingest` - Start data ingestion
-- `GET /sentiment/{symbol}` - Get symbol sentiment
 
 ### Trading Service (Port 8002)
-
 - `GET /health` - Health check
 - `POST /trade` - Execute manual trade
 - `GET /portfolio` - Get portfolio positions
-- `GET /sentiment/{symbol}` - Get aggregated sentiment
 - `POST /bot/start` - Start trading bot
-- `POST /bot/stop` - Stop trading bot
 
-### Dashboard Service (Port 8501)
+### Dashboard (Port 8501)
+- Web dashboard at `http://localhost:8501`
 
-- Web-based dashboard accessible at `http://localhost:8501`
-
-## 🔍 Monitoring
+## Monitoring
 
 ### Health Checks
 
-All services include health check endpoints:
-
 ```bash
-# Check sentiment service
+# Check if services are running
 curl http://localhost:8001/health
-
-# Check trading service
 curl http://localhost:8002/health
-
-# Check dashboard
-curl http://localhost:8501/_stcore/health
 ```
 
 ### Logs
 
 ```bash
-# Docker Compose
+# View logs
 docker-compose logs -f [service-name]
-
-# Kubernetes
-kubectl logs -f -l app=[service-name] -n sentiment-trading
 ```
 
-## 📈 Trading Strategy
+## How it Works
 
-The system implements a sentiment-driven trading strategy:
+1. **Data Collection**: Gets data from Twitter, Reddit, and news
+2. **Sentiment Analysis**: FinBERT analyzes text sentiment (-1 to +1)
+3. **Aggregation**: Combines sentiment scores for each stock
+4. **Trading**: Buys on positive sentiment, sells on negative
+5. **Risk Management**: Limits position sizes and losses
 
-1. **Data Collection**: Continuously ingests data from multiple sources
-2. **Sentiment Analysis**: FinBERT analyzes text sentiment (-1 to +1 scale)
-3. **Aggregation**: Weighted sentiment scores per symbol
-4. **Decision Making**: Buy signals on positive sentiment, sell on negative
-5. **Risk Management**: Position sizing and loss limits
-6. **Execution**: Automated trades via Alpaca API
+## Disclaimer
 
-## 🚨 Risk Disclaimer
+⚠️ **This is a demo project. Don't use it for real trading without proper testing.**
 
-⚠️ **This is a demonstration MVP and should NOT be used for actual trading without proper risk assessment and testing.**
+- Use paper trading only
+- Test thoroughly first
+- Add proper risk controls
 
-- Use paper trading accounts only
-- Test thoroughly before live deployment
-- Implement additional risk controls
-- Monitor performance continuously
-- Consider regulatory compliance
+## Security
 
-## 🔒 Security
-
-- API keys stored in Kubernetes secrets
-- Environment-based configuration
+- API keys stored in environment variables
 - No hardcoded credentials
 - Health checks and monitoring
-- Structured logging for audit trails
 
-## 📚 Development
+## Development
 
 ### Project Structure
 
 ```
 sentiment-trading-mvp/
-├── sentiment-service/     # FinBERT + data ingestion
-├── trading-service/       # Trading bot + Alpaca
-├── dashboard-service/     # Streamlit dashboard
-├── db-service/           # PostgreSQL setup
-├── cache-service/        # Redis setup
-├── k8s-manifests/       # Kubernetes deployments
-├── configs/             # Configuration files
-├── scripts/             # Build/deploy scripts
-└── docker-compose.yml   # Local development
+├── sentiment-service/     # Sentiment analysis
+├── trading-service/       # Trading bot
+├── dashboard-service/     # Dashboard
+├── configs/              # Config files
+├── scripts/              # Deploy scripts
+└── docker-compose.yml    # Local setup
 ```
 
-### Adding New Data Sources
+### Adding Features
 
-1. Implement ingestion function in `sentiment-service/main.py`
-2. Add to configuration in `trading_config.json`
-3. Update weights and thresholds
-4. Test with sample data
+1. Add new data sources in `sentiment-service/main.py`
+2. Update config in `trading_config.json`
+3. Test with sample data
 
-### Customizing Trading Logic
+### Customizing Trading
 
 1. Modify `run_trading_bot()` in `trading-service/main.py`
 2. Adjust sentiment thresholds
-3. Implement custom risk management
-4. Add technical indicators
+3. Add your own risk management
 
-## 🚀 Production Deployment
+## Deployment
 
-### AWS Deployment (Recommended)
-
-#### Option 1: Terraform + EKS (Full Infrastructure)
+### Local Setup (Recommended)
 
 ```bash
-# 1. Deploy AWS infrastructure with Terraform
+# Quick start
+./scripts/deploy-local.sh
+
+# Or manually
+docker-compose up -d
+```
+
+Access dashboard at http://localhost:8501
+
+### AWS Setup (Full Cloud)
+
+```bash
+# Deploy to AWS
 ./scripts/deploy-terraform.sh
-
-# 2. Create EKS cluster
-eksctl create cluster -f aws-configs/eks-cluster-config.yaml
-
-# 3. Deploy application to EKS
 ./scripts/deploy-aws.sh
 ```
 
-#### Option 2: Manual AWS Setup
+### Cost Comparison
 
-```bash
-# 1. Create EKS cluster
-eksctl create cluster -f aws-configs/eks-cluster-config.yaml
+| Setup | Cost | Features |
+|-------|------|----------|
+| **Local** | $0-20/month | Full microservices, monitoring |
+| **AWS EKS** | $200-500/month | Full cloud infrastructure |
 
-# 2. Create RDS PostgreSQL and ElastiCache Redis
-# (Use AWS Console or CLI)
+## Contributing
 
-# 3. Update k8s-manifests/aws-secrets.yaml with credentials
-
-# 4. Deploy to EKS
-kubectl apply -f k8s-manifests/
-kubectl apply -f k8s-manifests/aws-load-balancer.yaml
-```
-
-### AWS Services Used
-
-- **Compute**: EKS (Kubernetes)
-- **Database**: RDS PostgreSQL
-- **Cache**: ElastiCache Redis
-- **Container Registry**: ECR
-- **Load Balancing**: Network Load Balancer
-- **Monitoring**: CloudWatch
-- **Logging**: CloudWatch Logs
-- **Networking**: VPC, Security Groups, Subnets
-
-## 🤝 Contributing
-
-1. Fork the repository
+1. Fork the repo
 2. Create feature branch
-3. Implement changes
-4. Add tests
-5. Submit pull request
+3. Make changes
+4. Submit pull request
 
-## 📄 License
+## License
 
-This project is for educational and demonstration purposes. Please ensure compliance with all applicable laws and regulations before using in production.
+This project is for educational purposes. Make sure to follow all laws and regulations.
 
-## 🆘 Support
+## Support
 
-For issues and questions:
+If you have issues:
+1. Check the logs
+2. Verify your config
+3. Open an issue
 
-1. Check the logs and health endpoints
-2. Review configuration files
-3. Verify API keys and connectivity
-4. Check Kubernetes pod status
-5. Open an issue with detailed error information
+## Roadmap
 
-## 🔮 Roadmap
-
-- [ ] Additional sentiment models
-- [ ] Technical analysis integration
-- [ ] Backtesting framework
-- [ ] Advanced risk management
-- [ ] Multi-exchange support
-- [ ] Machine learning optimization
-- [ ] Real-time alerts
-- [ ] Performance analytics
-
----
-
-**Happy Trading! 📈💰**
+- [ ] More sentiment models
+- [ ] Technical analysis
+- [ ] Backtesting
+- [ ] Better risk management
+- [ ] More exchanges
